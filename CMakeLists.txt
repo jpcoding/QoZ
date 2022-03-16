@@ -1,21 +1,80 @@
-cmake_minimum_required(VERSION 3.0)
-project(SZ)
-#project(First VERSION 3.0.0.0)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-O3")
-add_definitions(-DPOLY_REGRESSION_COEF_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}/data/")
+cmake_minimum_required(VERSION 3.13)
+project(SZ3 VERSION 3.1.3.0)
+include(GNUInstallDirs)
+include(CTest)
 
-find_library(ZSTD_LIBS zstd HINTS "$ENV{HOME}/tools/zstd-1.4.4/install/lib")
-set(ZSTD_INCLUDES "$ENV{HOME}/tools/zstd-1.4.4/install/include")
+option(BUILD_SHARED_LIBS "build shared libraries by default" ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#download modified version of lzbench by kai zhao from https://github.com/ayzk/lzbench
-find_library(lzbench_LIBS lzbench HINTS "$ENV{HOME}/code/lzbench/")
-set(lzbench_INCLUDES "$ENV{HOME}/code/lzbench/")
-if (lzbench_LIBS)
-    add_definitions(-DENABLE_LZBENCH="TRUE")
-endif ()
+set(default_build_type "Release")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "No build type was set. Setting build type to ${default_build_type}.")
+  set(CMAKE_BUILD_TYPE ${default_build_type} CACHE
+          STRING "Choose the type to build" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+          "MinSizeRel" "RelWithDebInfo")
+endif()
 
-add_subdirectory(src)
+find_package(PkgConfig)
+find_package(OpenMP)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/SZ3/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/SZ3/version.hpp)
+
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(
+        ${PROJECT_NAME} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
+target_compile_features(${PROJECT_NAME}
+    INTERFACE cxx_std_17
+  )
+
+target_link_libraries(${PROJECT_NAME} INTERFACE OpenMP::OpenMP_CXX)
+
+option(SZ3_USE_BUNDLED_ZSTD "prefer the bundled version of Zstd" OFF)
+option(SZ3_DEBUG_TIMINGS "print debug timing information" ON)
+
+if(SZ3_DEBUG_TIMINGS)
+  target_compile_definitions(${PROJECT_NAME} INTERFACE SZ3_DEBUG_TIMINGS=1)
+else()
+  target_compile_definitions(${PROJECT_NAME} INTERFACE SZ3_DEBUG_TIMINGS=0)
+endif()
+
+pkg_search_module(ZSTD IMPORTED_TARGET libzstd)
+if(ZSTD_FOUND AND NOT SZ3_USE_BUNDLED_ZSTD)
+  target_link_libraries(${PROJECT_NAME} INTERFACE PkgConfig::ZSTD)
+else()
+  add_subdirectory(zstd)
+  target_link_libraries(${PROJECT_NAME} INTERFACE zstd)
+endif()
+
+find_package(GSL)
+if (GSL_FOUND)
+  target_compile_definitions(${PROJECT_NAME} INTERFACE -DENABLE_GSL="TRUE")
+endif()
+
 add_subdirectory(test)
 
+install(TARGETS ${PROJECT_NAME} 
+  EXPORT SZ3Targets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT SZ3Targets NAMESPACE SZ3:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/SZ3Config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/SZ3Config.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3
+  )
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/SZ3ConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+  )
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/SZ3Config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/SZ3ConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3
+  )
