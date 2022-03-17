@@ -186,14 +186,14 @@ namespace SZ {
             write(encoder, c);
             write(quantbinCnt, c);
             write(blockSize, c);
-            write(sampleBlockSize,c);
+            
             write(levelwisePredictionSelection, c);
             write(stride, c);
             write(maxStep,c);
             write(pred_dim, c);
             write(openmp, c);
-            write(exhaustiveTuning, c);
-            write(testLorenzo, c);
+            write(fixBlockSize, c);
+            
         };
 
         void load(const unsigned char *&c) {
@@ -221,15 +221,12 @@ namespace SZ {
             read(encoder, c);
             read(quantbinCnt, c);
             read(blockSize, c);
-            read(sampleBlockSize,c);
             read(levelwisePredictionSelection, c);
             read(stride, c);
             read(maxStep,c);
             read(pred_dim, c);
-            
             read(openmp, c);
-            read(exhaustiveTuning, c);
-            read(testLorenzo, c);
+            read(fixBlockSize, c);
         }
 
         void print() {

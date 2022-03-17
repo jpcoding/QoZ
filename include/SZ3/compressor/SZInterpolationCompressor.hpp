@@ -47,6 +47,7 @@ namespace SZ {
             uchar const *buffer_pos = buffer;
             std::vector <uint8_t> interpAlgo_list;
             std::vector <uint8_t> interpDirection_list;
+            int fixBlockSize;
             //size_t maxStep;
             //std::cout<<"dec start"<<std::endl;
             read(global_dimensions.data(), N, buffer_pos, remaining_length);
@@ -66,6 +67,8 @@ namespace SZ {
             read(levelwise_predictor_levels,buffer_pos);
             //std::cout<<levelwise_predictor_levels<<std::endl;
             read(blockwiseTuning,buffer_pos);
+
+            read(fixBlockSize,buffer_pos);
             if(blockwiseTuning){
                 size_t ops_num;
                 read(ops_num,buffer_pos);
@@ -165,6 +168,9 @@ namespace SZ {
                 size_t cur_blocksize;
                 if (blockwiseTuning){
                     cur_blocksize=blocksize;
+                }
+                else if (fixBlockSize>0){
+                    cur_blocksize=fixBlockSize;
                 }
                 else{
                     cur_blocksize=blocksize*stride;
@@ -522,6 +528,7 @@ namespace SZ {
             write(maxStep,buffer_pos);
             write(levelwise_predictor_levels,buffer_pos);
             write(conf.blockwiseTuning,buffer_pos);
+            write(conf.fixBlockSize,buffer_pos);
             if(conf.blockwiseTuning){
                 size_t ops_num=interp_ops.size();
                 write(ops_num,buffer_pos);
@@ -578,6 +585,7 @@ namespace SZ {
                 //std::cout<<maxStep<<std::endl;
                 write(conf.maxStep,buffer_pos);
                 write(conf.levelwisePredictionSelection,buffer_pos);
+                write(conf.fixBlockSize,buffer_pos);
                 if(conf.levelwisePredictionSelection>0){
                     write(conf.interpAlgo_list.data(),conf.levelwisePredictionSelection,buffer_pos);
                     write(conf.interpDirection_list.data(),conf.levelwisePredictionSelection,buffer_pos);
