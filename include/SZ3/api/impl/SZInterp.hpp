@@ -1670,7 +1670,7 @@ double Tuning(SZ::Config &conf, T *data){
                                         std::vector<size_t> starts{i,j};
                                         SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                         cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                         idx++;
 
 
@@ -1690,7 +1690,7 @@ double Tuning(SZ::Config &conf, T *data){
                                             
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
                                             //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
                                         }
 
@@ -1827,7 +1827,7 @@ double Tuning(SZ::Config &conf, T *data){
                                             std::vector<size_t> starts{i,j};
                                             SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
 
 
@@ -1845,7 +1845,7 @@ double Tuning(SZ::Config &conf, T *data){
                                                 std::vector<size_t> starts{i,j,kk};
                                                 SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                                 cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                metric_r+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                                 idx++;
                                             }
 
@@ -2468,7 +2468,7 @@ char *SZ_compress_Interp_blocked(SZ::Config &conf, T *data, size_t &outSize) {
                                         std::vector<size_t> starts{i,j};
                                         SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                         cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                         idx++;
 
 
@@ -2488,7 +2488,7 @@ char *SZ_compress_Interp_blocked(SZ::Config &conf, T *data, size_t &outSize) {
                                             
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
                                             //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
                                         }
 
@@ -2605,7 +2605,7 @@ char *SZ_compress_Interp_blocked(SZ::Config &conf, T *data, size_t &outSize) {
                                             std::vector<size_t> starts{i,j};
                                             SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
 
 
@@ -2623,7 +2623,7 @@ char *SZ_compress_Interp_blocked(SZ::Config &conf, T *data, size_t &outSize) {
                                                 std::vector<size_t> starts{i,j,kk};
                                                 SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                                 cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                metric_r+=SZ::SSIM(orig_range,range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                                 idx++;
                                             }
 

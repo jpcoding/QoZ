@@ -11,12 +11,12 @@ namespace SZ {
         return 20*log10(rng)-10*log10(mse);
     }
 
-    inline double SSIM(const double &xr,const double &yr,const double &xm,const double &xv2,const double &ym,const double &yv2,const double &cov) {
+    inline double SSIM(const double &xr,const double &xm,const double &xv2,const double &ym,const double &yv2,const double &cov) {
         double c1=0.0001,c2=0.0009;
-        if (xr>0)
+        if (xr>0){
             c1*=(xr*xr);
-        if (yr>0)
-            c2*=yr*yr;
+            c2*=xr*xr;
+        }
         return (2*xm*ym+c1)*(2*cov+c2)/(  (xm*xm+ym*ym+c1) *(xv2+yv2+c2) );
        
     }
