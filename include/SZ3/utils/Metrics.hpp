@@ -26,7 +26,8 @@ namespace SZ {
 
         if(N==2){
             size_t dimx=dims[0],dimy=dims[1],startx=starts[0],starty=starts[1],element_num=blocksize*blocksize;
-            double sum=0,sum2=0,max,min;
+            double sum=0,max,min;
+            sigma2=0;
             size_t start_idx=startx*dimy+starty;
             max=min=data[start_idx];
             for(size_t i=startx;i<startx+blocksize;i++){
@@ -34,7 +35,7 @@ namespace SZ {
                     size_t cur_idx=i*dimy+j;
                     T value=data[cur_idx];
                     sum+=value;
-                    sum2+=value*value;
+                    
                     max=value>max?value:max;
                     min=value<max?value:min;
 
@@ -42,15 +43,27 @@ namespace SZ {
 
             }
             mean=sum/element_num;
-            sigma2=sum2/element_num-mean*mean;
+
+            for(size_t i=startx;i<startx+blocksize;i++){
+                for(size_t j=starty;j<starty+blocksize;j++){
+                    size_t cur_idx=i*dimy+j;
+                    T value=data[cur_idx];
+                    sigma2+=(value-mean)*(value-mean);
+
+                }
+
+            }
+            
             range=max-min;
+            sigma2/=element_num;
         }
 
 
         else if(N==3){
             size_t dimx=dims[0],dimy=dims[1],dimz=dims[2],startx=starts[0],starty=starts[1],startz=starts[2],element_num=blocksize*blocksize*blocksize;
             size_t dimyz=dimy*dimz;
-            double sum=0,sum2=0,max,min;
+            double sum=0,max,min;
+            sigma2=0;
             size_t start_idx=startx*dimyz+starty*dimz+startz;
             max=min=data[start_idx];
             for(size_t i=startx;i<startx+blocksize;i++){
@@ -59,7 +72,7 @@ namespace SZ {
                         size_t cur_idx=i*dimyz+j*dimz+k;
                         T value=data[cur_idx];
                         sum+=value;
-                        sum2+=value*value;
+                       
                         max=value>max?value:max;
                         min=value<max?value:min;
                     }
@@ -68,10 +81,26 @@ namespace SZ {
 
             }
             mean=sum/element_num;
-            sigma2=sum2/element_num-mean*mean;
+            for(size_t i=startx;i<startx+blocksize;i++){
+                for(size_t j=starty;j<starty+blocksize;j++){
+                    for(size_t k=startz;k<startz+blocksize;k++){
+                        size_t cur_idx=i*dimyz+j*dimz+k;
+                        T value=data[cur_idx];
+                        sigma2+=(value-mean)*(value-mean);
+
+                        
+                    }
+
+                }
+
+            }
+
+           
             range=max-min;
+            sigma2/=element_num;
         }
     }
+
     template <class T>
     inline double blockwise_cov(T *data, T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize,const double & mean=0,const double & mean2=0){
         size_t N=dims.size();
@@ -84,12 +113,12 @@ namespace SZ {
                 for(size_t j=starty;j<starty+blocksize;j++){
                     size_t cur_idx=i*dimy+j;
                     T value=data[cur_idx],value2=data2[cur_idx];
-                    covsum+=value*value2;
+                    covsum+=(value-mean)*(value2-mean2);
 
                 }
 
             }
-            return covsum/element_num-mean*mean2;
+            return covsum/element_num;
         }
 
         
