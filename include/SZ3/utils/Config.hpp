@@ -79,7 +79,7 @@ namespace SZ {
                 std::cout << "Can't load cfg file  <<" << cfgpath << std::endl;
                 exit(0);
             } else {
-                std::cout << "Load cfg from " << cfgpath << std::endl;
+               // std::cout << "Load cfg from " << cfgpath << std::endl;
             }
 
             auto cmprAlgoStr = cfg.Get("GlobalSettings", "CmprAlgo", "");
