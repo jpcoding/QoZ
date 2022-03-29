@@ -49,23 +49,23 @@ namespace SZ {
             std::vector <uint8_t> interpDirection_list;
             int fixBlockSize;
             //size_t maxStep;
-            //std::cout<<"dec start"<<std::endl;
+           
             read(global_dimensions.data(), N, buffer_pos, remaining_length);
-            //std::cout<<global_dimensions[0]<<std::endl;
+           
             read(blocksize, buffer_pos, remaining_length);
-            //std::cout<<blocksize<<std::endl;
+            
             read(interpolator_id, buffer_pos, remaining_length);
-            //std::cout<<interpolator_id<<std::endl;
+            
             read(direction_sequence_id, buffer_pos, remaining_length);
-            //std::cout<<direction_sequence_id<<std::endl;
+           
             read(alpha,buffer_pos,remaining_length);
-            //std::cout<<alpha<<std::endl;
+            
             read(beta,buffer_pos,remaining_length);
-            //std::cout<<beta<<std::endl;
+           
             read(maxStep,buffer_pos,remaining_length);
-            //std::cout<<maxStep<<std::endl;
+           
             read(levelwise_predictor_levels,buffer_pos);
-            //std::cout<<levelwise_predictor_levels<<std::endl;
+            
             read(blockwiseTuning,buffer_pos);
 
             read(fixBlockSize,buffer_pos);
@@ -87,11 +87,10 @@ namespace SZ {
                 read(interpAlgo_list.data(),levelwise_predictor_levels,buffer_pos);
                 read(interpDirection_list.data(),levelwise_predictor_levels,buffer_pos);
             }
-            //std::cout<<maxStep<<std::endl;
+            
 
             init();
-            //std::cout<<anchor<<std::endl;
-            //std::cout<<interpolation_level<<std::endl;
+            
             quantizer.load(buffer_pos, remaining_length);
             encoder.load(buffer_pos, remaining_length);
             quant_inds = encoder.decode(buffer_pos, num_elements);
@@ -121,7 +120,7 @@ namespace SZ {
                     if (cur_ratio>beta){
                         cur_ratio=beta;
                     }
-                    //std::cout<<cur_ratio<<std::endl;
+                    
                     quantizer.set_eb(eb/cur_ratio);
                 }
                 else{
@@ -131,13 +130,13 @@ namespace SZ {
                     if (cur_ratio<beta){
                         cur_ratio=beta;
                     }
-                    //std::cout<<cur_ratio<<std::endl;
+                   
                     quantizer.set_eb(eb*cur_ratio);
                 }
 
 
 
-                 //std::cout<<level<<std::endl;
+                 
                 if(anchor and level==interpolation_level){
                     //quantizer.print_unpred();
                     recover_grid(decData,global_dimensions,maxStep);
@@ -209,7 +208,7 @@ namespace SZ {
                 }
             }
             quantizer.postdecompress_data();
-            //std::cout<<"decomp end"<<std::endl;
+           
             
 
             return decData;
@@ -258,7 +257,7 @@ namespace SZ {
 
             
             double predict_error=0.0;
-            //std::cout<<interpolation_level<<std::endl;
+          
 
             if (start_level<=0 or start_level>interpolation_level ){
                 start_level=interpolation_level;
@@ -269,8 +268,7 @@ namespace SZ {
             }
             int levelwise_predictor_levels=conf.interpAlgo_list.size();
 
-            //std::cout<<dimension_offsets[0]<<std::endl;
-            //std::cout<<dimension_offsets[1]<<std::endl;
+            
 
 
             for (uint level = start_level; level > end_level && level <= start_level; level--) {
@@ -291,8 +289,7 @@ namespace SZ {
                     if (cur_ratio>beta){
                         cur_ratio=beta;
                     }
-                    //if(start_level==1 and level==1)
-                        //std::cout<<cur_ratio<<std::endl;
+                    
                     quantizer.set_eb(eb/cur_ratio);
                 }
                 else{
@@ -302,7 +299,7 @@ namespace SZ {
                     if (cur_ratio<beta){
                         cur_ratio=beta;
                     }
-                    //std::cout<<cur_ratio<<std::endl;
+                    
                     quantizer.set_eb(eb*cur_ratio);
                 }
               
@@ -353,8 +350,7 @@ namespace SZ {
                 else{
                     cur_blocksize=blocksize*stride;
                 }
-               // std::cout<<cur_blocksize<<std::endl;
-//                std::cout << "Level = " << level << ", stride = " << stride << std::endl;
+               
                 
                 auto inter_block_range = std::make_shared<
                         SZ::multi_dimensional_range<T, N>>(data, std::begin(global_dimensions),
@@ -477,8 +473,7 @@ namespace SZ {
                     
                 }
                 if(tuning){
-                        //std::cout<<level<<std::endl;
-                        //std::cout<<quant_inds.size()<<std::endl;
+                        
                         conf.quant_bin_counts[level-1]=quant_inds.size();
                 }
                 
@@ -495,7 +490,7 @@ namespace SZ {
 //            writefile("quant.dat", quant_inds.data(), num_elements);
             quantizer.set_eb(eb);
             if (tuning){
-                //std::cout<<conf.quant_bin_counts[0]<<std::endl;
+               
                 
                 conf.quant_bins=quant_inds;
                 std::vector<int>().swap(quant_inds);
@@ -504,13 +499,13 @@ namespace SZ {
                 conf.decomp_square_error=predict_error;
                 size_t bufferSize = 1;
                 uchar *buffer = new uchar[bufferSize];
-                //quantizer.print_unpred();
-                //if(start_level==1)
-                    //std::cout<<predict_error<<std::endl;
+                
                 return buffer;
             }
-            timer.stop("prediction");
-            assert(quant_inds.size() == num_elements);
+            if(conf.verbose)
+                timer.stop("prediction");
+           
+            //assert(quant_inds.size() == num_elements);
 
             size_t bufferSize = 1.5 * (quant_inds.size() * sizeof(T) + quantizer.size_est());
             uchar *buffer = new uchar[bufferSize];
@@ -582,7 +577,7 @@ namespace SZ {
                 write(conf.interpDirection, buffer_pos);
                 write(conf.alpha,buffer_pos);
                 write(conf.beta,buffer_pos);
-                //std::cout<<maxStep<<std::endl;
+               
                 write(conf.maxStep,buffer_pos);
                 write(conf.levelwisePredictionSelection,buffer_pos);
                 write(conf.fixBlockSize,buffer_pos);
@@ -682,6 +677,7 @@ namespace SZ {
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
 
                         quantizer.insert_unpred(*(data+x*conf.dims[1]+y));
+                        //quant_inds.push_back(0);
                     }
                 }
             }
@@ -690,6 +686,7 @@ namespace SZ {
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
                         for(size_t z=maxStep*(tuning==1);z<conf.dims[2];z+=maxStep){
                             quantizer.insert_unpred(*(data+x*conf.dims[1]*conf.dims[2]+y*conf.dims[2]+z) );
+                            //quant_inds.push_back(0);
 
                         }
 
@@ -710,6 +707,7 @@ namespace SZ {
                     for (size_t y=0;y<global_dimensions[1];y+=maxStep){
 
                         decData[x*global_dimensions[1]+y]=quantizer.recover_unpred();
+                        //quant_index++;
                     }
                 }
             }
@@ -718,6 +716,7 @@ namespace SZ {
                     for (size_t y=0;y<global_dimensions[1];y+=maxStep){
                         for(size_t z=0;z<global_dimensions[2];z+=maxStep){
                             decData[x*global_dimensions[1]*global_dimensions[2]+y*global_dimensions[2]+z]=quantizer.recover_unpred();
+                            //quant_index++;
 
                         }
 
@@ -816,10 +815,7 @@ namespace SZ {
                             T *d = data + begin + (n - 1) * stride;
                             if (n < 4) {
                                 
-                                //std::cout<<begin<<std::endl;
-                                //std::cout<<stride<<std::endl;
-                                //std::cout<<*d<<std::endl;
-                                //std::cout<<*(d-stride)<<std::endl;
+                              
                                 quantize(d - data, *d, *(d - stride));
                                
 

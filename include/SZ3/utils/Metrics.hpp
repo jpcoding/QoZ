@@ -146,6 +146,118 @@ namespace SZ {
         }
     }
 
+    template <class T>
+    inline double blockwise_autocorrelation(T *data, T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize){
+         size_t N=dims.size();
+         size_t element_num;
+         std::vector<T>diffs;
+         if(N==2){
+            size_t dimx=dims[0],dimy=dims[1],startx=starts[0],starty=starts[1];
+            element_num=blocksize*blocksize;
+            diffs.resize(element_num,0);
+            
+            size_t idx=0;
+            for(size_t i=startx;i<startx+blocksize;i++){
+                for(size_t j=starty;j<starty+blocksize;j++){
+                    size_t cur_idx=i*dimy+j;
+                    T value=data[cur_idx],value2=data2[cur_idx];
+                    diffs[idx++]=value-value2;
+
+                }
+
+            }
+            
+        }
+
+        
+
+        else if(N==3){
+            size_t dimx=dims[0],dimy=dims[1],dimz=dims[2],startx=starts[0],starty=starts[1],startz=starts[2];
+            size_t dimyz=dimy*dimz;
+            element_num=blocksize*blocksize*blocksize;
+            
+            diffs.resize(element_num,0);
+            size_t idx=0;
+            for(size_t i=startx;i<startx+blocksize;i++){
+                for(size_t j=starty;j<starty+blocksize;j++){
+                    for(size_t k=startz;k<startz+blocksize;k++){
+                        size_t cur_idx=i*dimyz+j*dimz+k;
+                        T value=data[cur_idx],value2=data2[cur_idx];
+                        diffs[idx++]=value-value2;
+                    }
+
+                }
+
+            }
+            
+        }
+        else{
+            return 0;
+        }
+        double avg=0;
+        for(size_t i=0;i<element_num;i++){
+            avg+=diffs[i];
+        }
+        avg/=element_num;
+        double cov=0;
+        for(size_t i=0;i<element_num;i++){
+            T value=diffs[i]-avg;
+            cov+=value*value;
+        }
+        cov/=element_num;
+        if (cov==0){
+            return 1;
+        }
+        double sum=0;
+        for (size_t i=0;i<element_num-1;i++){
+            sum+=(diffs[i]-avg)*(diffs[i+1]-avg);
+        }
+        return sum/(element_num-1)/cov;
+
+
+
+
+
+    }
+
+    template <class T>
+    inline double autocorrelation(T *data, T * data2,const size_t &element_num){
+         
+         
+        std::vector<T>diffs(element_num,0);
+
+         
+        double avg=0;
+        for(size_t i=0;i<element_num;i++){
+            T value=data[i]-data2[i];
+            avg+=value;
+            diffs[i]=value;
+        }
+        avg/=element_num;
+        double cov=0;
+        for(size_t i=0;i<element_num;i++){
+            T value=diffs[i]-avg;
+            cov+=value*value;
+        }
+        cov/=element_num;
+        if (cov==0){
+            return 1;
+        }
+        double sum=0;
+        for (size_t i=0;i<element_num-1;i++){
+            sum+=(diffs[i]-avg)*(diffs[i+1]-avg);
+        }
+        return sum/(element_num-1)/cov;
+
+
+
+
+
+    }
+
+
     
 }
+
+
 #endif //SZ_INTERPOLATORS_HPP

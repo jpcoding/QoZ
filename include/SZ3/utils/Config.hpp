@@ -30,9 +30,9 @@ namespace SZ {
     const char *INTERP_ALGO_STR[] = {"INTERP_ALGO_LINEAR", "INTERP_ALGO_CUBIC"};
 
     enum TUNING_TARGET {
-        TUNING_TARGET_RD, TUNING_TARGET_CR, TUNING_TARGET_SSIM
+        TUNING_TARGET_RD, TUNING_TARGET_CR, TUNING_TARGET_SSIM, TUNING_TARGET_AC
     };
-    const char *TUNING_TARGET_STR[] = {"TUNING_TARGET_RD", "TUNING_TARGET_CR", "TUNING_TARGET_SSIM"};
+    const char *TUNING_TARGET_STR[] = {"TUNING_TARGET_RD", "TUNING_TARGET_CR", "TUNING_TARGET_SSIM", "TUNING_TARGET_AC"};
 
     template<class T>
     const char *enum2Str(T e) {
@@ -116,6 +116,9 @@ namespace SZ {
             else if (tuningTargetStr == TUNING_TARGET_STR[TUNING_TARGET_SSIM]) {
                 tuningTarget = TUNING_TARGET_SSIM;
             }
+            else if (tuningTargetStr == TUNING_TARGET_STR[TUNING_TARGET_AC]) {
+                tuningTarget = TUNING_TARGET_AC;
+            }
                 
 
 
@@ -157,6 +160,7 @@ namespace SZ {
             profiling=cfg.GetInteger("AlgoSettings", "profiling", profiling);
             SSIMBlockSize=cfg.GetInteger("AlgoSettings", "SSIMBlockSize", SSIMBlockSize);
             fixBlockSize=cfg.GetInteger("AlgoSettings", "fixBlockSize", fixBlockSize);
+            verbose=cfg.GetInteger("AlgoSettings", "verbose", verbose);
             
 
 
@@ -284,6 +288,7 @@ namespace SZ {
         int fixBlockSize=0;
         std::vector<double> lorenzo1_coeffs;
         std::vector<double> lorenzo2_coeffs;
+        int verbose=1;
         
 
     };
