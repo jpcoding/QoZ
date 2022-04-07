@@ -3,14 +3,14 @@
 // MODIFY version.hpp.in as needed
 //
 
-#ifndef SZ3_VERSION_HPP
-#define SZ3_VERSION_HPP
+#ifndef QoZ_VERSION_HPP
+#define QoZ_VERSION_HPP
 
-#define PROJECT_NAME "SZ3"
-#define PROJECT_VER  "3.1.3.0"
-#define PROJECT_VER_MAJOR "3"
+#define PROJECT_NAME "QoZ"
+#define PROJECT_VER  "0.1.0.0"
+#define PROJECT_VER_MAJOR "0"
 #define PROJECT_VER_MINOR "1"
-#define PTOJECT_VER_PATCH "3"
-#define PTOJECT_VER_TWEAK "0"
+#define PROJECT_VER_PATCH "0"
+#define PROJECT_VER_TWEAK "0"
 
 #endif //SZ3_VERSION_HPP

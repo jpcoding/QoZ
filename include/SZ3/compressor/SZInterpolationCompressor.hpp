@@ -502,6 +502,7 @@ namespace SZ {
                 
                 return buffer;
             }
+            //std::cout<<"predict_ended"<<std::endl;
             if(conf.verbose)
                 timer.stop("prediction");
            
@@ -519,11 +520,12 @@ namespace SZ {
             write(direction_sequence_id, buffer_pos);
             write(alpha,buffer_pos);
             write(beta,buffer_pos);
-            //std::cout<<maxStep<<std::endl;
+           
             write(maxStep,buffer_pos);
             write(levelwise_predictor_levels,buffer_pos);
             write(conf.blockwiseTuning,buffer_pos);
             write(conf.fixBlockSize,buffer_pos);
+
             if(conf.blockwiseTuning){
                 size_t ops_num=interp_ops.size();
                 write(ops_num,buffer_pos);
@@ -535,16 +537,18 @@ namespace SZ {
                 write(conf.interpAlgo_list.data(),levelwise_predictor_levels,buffer_pos);
                 write(conf.interpDirection_list.data(),levelwise_predictor_levels,buffer_pos);
             }
+           
             quantizer.save(buffer_pos);
             quantizer.postcompress_data();
             quantizer.clear();
-            
+          
 
            
             encoder.preprocess_encode(quant_inds, 0);
             encoder.save(buffer_pos);
             encoder.encode(quant_inds, buffer_pos);
             encoder.postprocess_encode();
+            
             //timer.stop("Coding");
             //timer.start();
             assert(buffer_pos - buffer < bufferSize);
@@ -554,6 +558,7 @@ namespace SZ {
                                                      buffer_pos - buffer,
                                                      compressed_size);
             lossless.postcompress_data(buffer);
+            
             //timer.stop("Lossless") ;
             
 
@@ -642,6 +647,7 @@ namespace SZ {
             }
 
             if (maxStep>0){
+               
                 int max_interpolation_level=(uint)log2(maxStep)+1;
                 if (max_interpolation_level<=interpolation_level){
                     anchor=true;
@@ -669,9 +675,18 @@ namespace SZ {
         void build_grid(Config &conf, T *data,size_t maxStep,int tuning=0){
             
             assert(maxStep>0);
+
+           
             if(tuning>1)
                 return;
-            
+            /*
+            else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                //std::cout<<"dd"<<std::endl;
+                quantizer.insert_unpred(*data);
+                return;
+
+            }
+            */
             if (N==2){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
