@@ -134,6 +134,7 @@ char *SZ_compress(const SZ::Config &config, T *data, size_t &outSize) {
  */
 template<class T>
 void SZ_decompress(SZ::Config &conf, char *cmpData, size_t cmpSize, T *&decData) {
+    //SZ::Timer timer(true);
     {
         //load config
         int confSize;
@@ -141,9 +142,13 @@ void SZ_decompress(SZ::Config &conf, char *cmpData, size_t cmpSize, T *&decData)
         SZ::uchar const *cmpDataPos = (SZ::uchar *) cmpData + (cmpSize - sizeof(int) - confSize);
         conf.load(cmpDataPos);
     }
+    //timer.stop("load config");
+    //timer.start();
     if (decData == nullptr) {
         decData = new T[conf.num];
     }
+    //timer.stop("alloc memory");
+    //timer.start();
     if (conf.N == 1) {
         SZ_decompress_impl<T, 1>(conf, cmpData, cmpSize, decData);
     } else if (conf.N == 2) {
@@ -155,6 +160,7 @@ void SZ_decompress(SZ::Config &conf, char *cmpData, size_t cmpSize, T *&decData)
     } else {
         SZ_decompress_impl<T, 4>(conf, cmpData, cmpSize, decData);
     }
+    //timer.stop("decomp");
 }
 
 /**
