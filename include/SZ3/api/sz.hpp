@@ -133,11 +133,13 @@ char *SZ_compress(const SZ::Config &config, T *data, size_t &outSize) {
 
  */
 template<class T>
-void SZ_decompress(SZ::Config &conf, char *cmpData, size_t cmpSize, T *&decData) {
+void SZ_decompress(SZ::Config &config, char *cmpData, size_t cmpSize, T *&decData) {
     //SZ::Timer timer(true);
+    SZ::Config conf(config);
     {
         //load config
         int confSize;
+        
         memcpy(&confSize, cmpData + (cmpSize - sizeof(int)), sizeof(int));
         SZ::uchar const *cmpDataPos = (SZ::uchar *) cmpData + (cmpSize - sizeof(int) - confSize);
         conf.load(cmpDataPos);
