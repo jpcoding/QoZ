@@ -41,6 +41,8 @@ namespace QoZ {
 
         T *decompress(uchar const *cmpData, const size_t &cmpSize, T *decData) {
 
+            printf("using decompress \n");
+
             size_t remaining_length = cmpSize;
             uchar *buffer = lossless.decompress(cmpData, remaining_length);
             int levelwise_predictor_levels;
@@ -70,6 +72,13 @@ namespace QoZ {
             read(blockwiseTuning,buffer_pos);
 
             read(fixBlockSize,buffer_pos);
+
+            // read adaptive quantization index 
+            read(verySmallEb,buffer_pos );
+            read(levelSelected, buffer_pos);
+
+
+
             if(blockwiseTuning){
                 size_t ops_num;
                 read(ops_num,buffer_pos);
@@ -95,6 +104,8 @@ namespace QoZ {
             quantizer.load(buffer_pos, remaining_length);
             encoder.load(buffer_pos, remaining_length);
             quant_inds = encoder.decode(buffer_pos, num_elements);
+            std::cout<< quantizer.get_adptFactor()<<std::endl;
+
 
             encoder.postprocess_decode();
 
@@ -102,6 +113,8 @@ namespace QoZ {
             //timer.stop("decode");
             //timer.start();
             double eb = quantizer.get_eb();
+            
+            double tmp=eb;
             if(!anchor){
                 *decData = quantizer.recover(0, quant_inds[quant_index++]);
             }
@@ -117,9 +130,18 @@ namespace QoZ {
             }
             size_t op_index=0;
 
-
+            std::cout<< " level selected " <<(int) levelSelected << "small eb " <<  verySmallEb <<std::endl;
     
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
+
+                if (level == levelSelected)
+                {
+                    eb=tmp;
+                }
+                else{
+                    eb = verySmallEb; 
+                }
+
                 if (alpha<0) {
                     if (level >= 3) {
                         quantizer.set_eb(eb * eb_ratio);
@@ -149,11 +171,12 @@ namespace QoZ {
                     quantizer.set_eb(eb*cur_ratio);
                 }
 
+                std::cout<<"level = " << level<< "\t";
+                std::cout<<"global eb = " << eb<< "\t";
+                std::cout<<"level eb = " << quantizer.get_eb() << std::endl;
                
                
-                
-                
-                    
+                                    
                 uint8_t cur_interpolator=interpolator_id;
                 uint8_t cur_direction=direction_sequence_id;
                 
@@ -350,6 +373,8 @@ namespace QoZ {
 
     
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
+
+                
                 if (alpha<0) {
                     if (level >= 3) {
                         quantizer.set_eb(eb * eb_ratio);
@@ -378,6 +403,11 @@ namespace QoZ {
                    
                     quantizer.set_eb(eb*cur_ratio);
                 }
+
+
+                std::cout<<"level = " << level<< "\t";
+                std::cout<<"global eb = " << eb<< "\t";
+                std::cout<<"level eb = " << quantizer.get_eb() << std::endl;
 
                
                
@@ -445,26 +475,34 @@ namespace QoZ {
         }
         // compress given the error bound
         uchar *compress( Config &conf, T *data, size_t &compressed_size,int tuning=0,int start_level=0,int end_level=0) {
-            
+
+            my_conf=conf;
             //tuning 0: normal compress 1:tuning to return qbins and psnr 2: tuning to return prediction loss
             Timer timer;
             timer.start();
             std::copy_n(conf.dims.begin(), N, global_dimensions.begin());
             blocksize = conf.interpBlockSize;
+            quantizer.set_adptFactor(conf.adaptiveEbFactor);
+            // std::cout<< quantizer.get_adptFactor()<<std::endl;
+
             
             maxStep=conf.maxStep;
-            
+            levelSelected=conf.levelSelected;
             interpolator_id = conf.interpAlgo;
             direction_sequence_id = conf.interpDirection;
             alpha=conf.alpha;
             beta=conf.beta;
+            verySmallEb=conf.verySmallEb;
+            if (tuning==0 )
+            {std::cout<< " level selected " << levelSelected << "small eb " <<  verySmallEb <<std::endl;}
 
-
+            // std::cout<<"tuning =" <<tuning<<std::endl;
 
             std::vector<uint8_t>interp_ops;
             std::vector<uint8_t>interp_dirs;
             init();
             if (tuning){
+                // std::cout<<tuning<<std::endl;
                 std::vector<int>().swap(quant_inds);
                 std::vector<int>().swap(conf.quant_bins);
                 conf.quant_bin_counts=std::vector<size_t>(interpolation_level,0);
@@ -475,9 +513,15 @@ namespace QoZ {
             }
             
             quant_inds.reserve(num_elements);
+            my_pred.reserve(num_elements);
+            my_quant.reserve(num_elements);
+            my_level.reserve(num_elements);
+            my_error.reserve(num_elements);
+
             size_t interp_compressed_size = 0;
 
             double eb = quantizer.get_eb();
+            double tmp=eb;
 
 //            printf("Absolute error bound = %.5f\n", eb);
 
@@ -493,7 +537,11 @@ namespace QoZ {
 
 
             if(!anchor){
-                quant_inds.push_back(quantizer.quantize_and_overwrite(*data, 0));
+
+                int tmp = quantizer.quantize_and_overwrite(*data, 0 );
+                quant_inds.push_back(tmp);
+                my_quant.push_back(tmp);
+                my_pred.push_back(0);
             }
             else if (start_level==interpolation_level){
                 if(tuning){
@@ -511,12 +559,21 @@ namespace QoZ {
             
             int levelwise_predictor_levels=conf.interpAlgo_list.size();
 
+
             
             
 
             for (uint level = start_level; level > end_level && level <= start_level; level--) {
 
-                
+                current_level=level;
+
+                if (level == levelSelected)
+                {
+                    eb=tmp;
+                }
+                else{
+                    eb = verySmallEb ; 
+                }
 
                 if (alpha<0) {
                     if (level >= 3) {
@@ -545,15 +602,13 @@ namespace QoZ {
                     
                     quantizer.set_eb(eb*cur_ratio);
                 }
-              
+                if(tuning == 0){
+                std::cout<<"level = " << level<< "\t";
+                std::cout<<"global eb = " << eb<< "\t";
+                std::cout<<"level eb = " << quantizer.get_eb() << std::endl;
+                }
                
-                    
-                    
-                   
 
-
-
-              
 
                 int cur_interpolator;
                 int cur_direction;
@@ -573,6 +628,10 @@ namespace QoZ {
                         }
                     }
                 //}
+
+                // std::cout << "Current interpolator "<< cur_interpolator<<std::endl;
+
+                // std::cout << "Current direction " <<cur_direction<<std::endl;
                 
                 uint stride = 1U << (level - 1);
                 size_t cur_blocksize;
@@ -601,12 +660,6 @@ namespace QoZ {
                 //if(!conf.blockwiseTuning){
                
                     for (auto block = inter_begin; block != inter_end; ++block) {
-
-
-
-
-                        
-
 
                         auto start_idx=block.get_global_index();
                         auto end_idx = start_idx;
@@ -704,13 +757,10 @@ namespace QoZ {
                         
 
                         //else{
-                        
-                        
-                            predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
+                          predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
                                                 interpolators[cur_interpolator], cur_direction, stride,tuning);
                         //}
-                    
-                        
+                                           
                     }
                 //}
                 /*
@@ -829,7 +879,7 @@ namespace QoZ {
 
 //            writefile("pred.dat", preds.data(), num_elements);
 //            writefile("quant.dat", quant_inds.data(), num_elements);
-            quantizer.set_eb(eb);
+            quantizer.set_eb(tmp);
             if (tuning){
                
                 
@@ -850,6 +900,21 @@ namespace QoZ {
            
             //assert(quant_inds.size() == num_elements);
 
+            writefile("pred.dat",my_pred.data(),num_elements);
+            writefile("quant.dat", my_quant.data(), num_elements);
+            writefile("level.dat", my_level.data(), num_elements);
+            writefile("pred_error.dat", my_error.data(), num_elements);
+            writefile("decompress.dat",data, num_elements);
+            writefile("interp_direction.dat",conf.interpDirection_list.data(),conf.interpDirection_list.size());
+            writefile("dimension_seq.dat",dimension_sequences.data(),dimension_sequences.size());
+
+
+            for(int i = 0; i< conf.interpDirection_list.size(); i++){
+                int tmp=conf.interpDirection_list[i];
+                std::cout<< " " << tmp << std::endl;
+            }
+
+
             size_t bufferSize = 1.5 * (quant_inds.size() * sizeof(T) + quantizer.size_est());
             uchar *buffer = new uchar[bufferSize];
             uchar *buffer_pos = buffer;
@@ -867,6 +932,11 @@ namespace QoZ {
             write(levelwise_predictor_levels,buffer_pos);
             write(conf.blockwiseTuning,buffer_pos);
             write(conf.fixBlockSize,buffer_pos);
+
+            // adaptive quantization parameters 
+            write(verySmallEb,buffer_pos);
+            write(levelSelected,buffer_pos);
+
 
             if(conf.blockwiseTuning){
                 size_t ops_num=interp_ops.size();
@@ -1438,16 +1508,22 @@ namespace QoZ {
         inline void quantize(size_t idx, T &d, T pred) {
 
 //            preds[idx] = pred;
-//            quant_inds[idx] = quantizer.quantize_and_overwrite(d, pred);
+//            quant_inds[idx] = quantizer.adapt_quantize_and_overwrite(d, pred);
             //T orig=d;
-            quant_inds.push_back(quantizer.quantize_and_overwrite(d, pred));
+            // distribution of (d-pred)
+            my_error[idx]=d-pred; // 
+            int tmp = quantizer.quantize_and_overwrite(d, pred);
+            quant_inds.push_back(tmp);
+            my_pred[idx]=pred;
+            my_quant[idx]=tmp;
+            my_level[idx] = current_level;
             //return fabs(d-orig);
         }
 
         inline double quantize_tuning(size_t idx, T &d, T pred, int mode=1) {
 
 //            preds[idx] = pred;
-//            quant_inds[idx] = quantizer.quantize_and_overwrite(d, pred);
+//            quant_inds[idx] = quantizer.adapt_quantize_and_overwrite(d, pred);
 
             if (mode==1){
                 T orig=d;
@@ -1508,25 +1584,16 @@ namespace QoZ {
                             quantize(d - data, *d, interp_linear(*(d - stride), *(d + stride)));
                         }
                       
-
                         if (n % 2 == 0) {
                             T *d = data + begin + (n - 1) * stride;
                             if (n < 4) {
-                                
-                              
+                                                             
                                 quantize(d - data, *d, *(d - stride));
                                
-
-                            } else {
-                               
-
-                                quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
-                                
-
+                            } else {                             
+                                quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));                               
                             }
                         }
-                       
-
                     }
 
                 } else {
@@ -2093,6 +2160,7 @@ namespace QoZ {
             //if(direction!=2){
                
                 const std::array<int, N> dims = dimension_sequences[direction];
+
                 for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
                     size_t begin_offset = begin[dims[0]] * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]];
                     predict_error += block_interpolation_1d(data, begin_offset,
@@ -2401,6 +2469,9 @@ namespace QoZ {
         double beta;
         std::vector<std::string> interpolators = {"linear", "cubic"};
         std::vector<int> quant_inds;
+        std::vector<int> my_quant;
+        std::vector<T> my_pred;
+        std::vector<T> my_error;
         size_t quant_index = 0; // for decompress
         size_t maxStep=0;
         double max_error;
@@ -2412,6 +2483,12 @@ namespace QoZ {
         std::array<size_t, N> dimension_offsets;
         std::vector<std::array<int, N>> dimension_sequences;
         int direction_sequence_id;
+        int current_level=-1;
+        std::vector<int> my_level;
+        uint8_t levelSelected = 0;
+        Config my_conf;
+        double  verySmallEb=1e-30;
+       
     };
 
 

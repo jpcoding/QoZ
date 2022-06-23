@@ -176,6 +176,9 @@ namespace QoZ {
             lastPdTuning=cfg.GetInteger("AlgoSettings", "lastPdTuning", lastPdTuning);
             abList=cfg.GetInteger("AlgoSettings", "abList", abList);
 
+            adaptiveEbFactor=cfg.GetReal("AlgoSettings", "adaptiveEbFactor", adaptiveEbFactor);
+            verySmallEb=cfg.GetReal("AlgoSettings", "verySmallEb", verySmallEb);
+            levelSelected=cfg.GetInteger("AlgoSettings", "levelSelected", levelSelected);
 
 
         }
@@ -214,6 +217,8 @@ namespace QoZ {
             write(fixBlockSize, c);
             write(blockwiseSampleBlockSize, c);
             write(QoZ, c);
+            write(adaptiveEbFactor,c);
+            write(verySmallEb,c );
 
             
         };
@@ -252,6 +257,8 @@ namespace QoZ {
             read(fixBlockSize, c);
             read(blockwiseSampleBlockSize, c);
             read(QoZ, c);
+            read(adaptiveEbFactor,c);
+            read(verySmallEb,c );
         }
 
         void print() {
@@ -321,6 +328,10 @@ namespace QoZ {
 
         
 
+        // adaptive quantization around 0
+        double adaptiveEbFactor=0.5;
+        double verySmallEb = 1e-30;
+        uint8_t levelSelected=0;
     };
 
 

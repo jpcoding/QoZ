@@ -40,7 +40,7 @@ if(QoZ_DEBUG_TIMINGS)
 else()
   target_compile_definitions(${PROJECT_NAME} INTERFACE QoZ_DEBUG_TIMINGS=0)
 endif()
-
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/home/jp/.local/lib/pkgconfig")
 pkg_search_module(ZSTD IMPORTED_TARGET libzstd)
 if(ZSTD_FOUND AND NOT QoZ_USE_BUNDLED_ZSTD)
   message("Zstd found.")

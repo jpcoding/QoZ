@@ -43,6 +43,7 @@ char *SZ_compress_Interp(QoZ::Config &conf, T *data, size_t &outSize) {
     
    
     //QoZ::Timer timer;
+    std::cout<<"using SZ_compress_Interp "<<std::endl;
 
     //timer.start();
     char *cmpData = (char *) sz.compress(conf, data, outSize);
@@ -128,6 +129,8 @@ char *SZ_compress_AutoSelectiveInterp(QoZ::Config &conf, T *data, size_t &outSiz
     
     
     if (conf.levelwisePredictionSelection<=1){
+                std::cout<<"level levelwisePredictionSelection = "<<1<<std::endl;
+
         std::vector<T> orig_data(element_num,0);
         //std::vector<int> best_quant_bins;
         //std::vector<T> best_decomp(element_num,0);
@@ -212,6 +215,7 @@ char *SZ_compress_AutoSelectiveInterp(QoZ::Config &conf, T *data, size_t &outSiz
         
     }
     else{//levelwise
+        std::cout<<"level levelwisePredictionSelection = "<<0<<std::endl;
         std::vector<T> orig_data(element_num,0);
         //std::vector<int> best_quant_bins;
         //std::vector<T> best_decomp(element_num,0);
@@ -303,7 +307,7 @@ template<class T, QoZ::uint N>
 char *SZ_compress_AutoSelectiveInterp_with_sampling(QoZ::Config &conf, T *data, size_t &outSize,std::vector <int> InterpAlgo_Candidates,std::vector <int>interpDirection_Candidates,size_t sample_size,bool blockwise=false){
     //Assert absError already calculated
 
-    
+    std::cout<<"using SZ_compress_AutoSelectiveInterp_with_sampling  "<<std::endl;
     size_t  global_num=conf.num;
     std::vector<size_t> global_dims=conf.dims;
 
@@ -538,6 +542,8 @@ inline void init_betalist(std::vector<double> &beta_list,const double &rel_bound
 
 template<class T, QoZ::uint N>
 double Tuning(QoZ::Config &conf, T *data){
+
+    std::cout<<"tuning"<<std::endl;
    
 
     //QoZ::Timer timer(true);
@@ -3293,7 +3299,6 @@ char *SZ_compress_Interp_lorenzo(QoZ::Config &conf, T *data, size_t &outSize) {
     
 
     if (conf.cmprAlgo == QoZ::ALGO_INTERP) {
-         //std::cout << "pos8 "<< std::endl;
        
         std::vector<int>().swap(conf.quant_bins);
         double tuning_time = timer.stop();
@@ -3458,6 +3463,7 @@ char *SZ_compress_Interp_lorenzo(QoZ::Config &conf, T *data, size_t &outSize) {
             std::cout << "Tuning time = " << tuning_time << "s" << std::endl;
             std::cout << "====================================== END TUNING ======================================" << std::endl;
         }
+        std::cout << "used SZ_compress_LorenzoReg " << std::endl;
         return SZ_compress_LorenzoReg<T, N>(conf, data, outSize);
     }
 
