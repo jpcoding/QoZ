@@ -13,7 +13,8 @@ namespace QoZ {
 
             virtual int quantize(T data, T pred) = 0;
 
-            virtual int quantize_and_overwrite(T &data, T pred,bool save_unpred) = 0;
+            virtual int quantize_and_overwrite(T &data, T pred, bool save_unpred) = 0;
+            // virtual int adapt_quantize_and_overwrite(T &data, T pred, const double adaptiveFactor, bool save_unpred) = 0;
 
             virtual T recover(T pred, int quant_index) = 0;
 

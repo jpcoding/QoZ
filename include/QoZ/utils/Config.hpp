@@ -169,7 +169,9 @@ namespace QoZ {
             verbose=cfg.GetInteger("AlgoSettings", "verbose", verbose);
             QoZ=cfg.GetInteger("AlgoSettings", "QoZ", QoZ);
             blockwiseSampleBlockSize=cfg.GetInteger("AlgoSettings", "blockwiseSampleBlockSize", blockwiseSampleBlockSize);
-            
+            adaptiveEbFactor=cfg.GetReal("AlgoSettings", "adaptiveEbFactor", adaptiveEbFactor);
+            verySmallEb=cfg.GetReal("AlgoSettings", "verySmallEb", verySmallEb);
+            levelSelected=cfg.GetInteger("AlgoSettings", "levelSelected", levelSelected);
 
 
         }
@@ -208,6 +210,9 @@ namespace QoZ {
             write(fixBlockSize, c);
             write(blockwiseSampleBlockSize, c);
             write(QoZ, c);
+            write(adaptiveEbFactor,c);
+            write(verySmallEb,c );
+            write(levelSelected,c);
 
             
         };
@@ -246,6 +251,9 @@ namespace QoZ {
             read(fixBlockSize, c);
             read(blockwiseSampleBlockSize, c);
             read(QoZ, c);
+            read(adaptiveEbFactor,c);
+            read(verySmallEb,c );
+            read(levelSelected,c);
         }
 
         void print() {
@@ -306,9 +314,10 @@ namespace QoZ {
         std::vector<double> lorenzo2_coeffs;
         int verbose=1;
         int QoZ=0;
-
-        
-
+        // adaptive quantization around 0
+        double adaptiveEbFactor=0.5;
+        double verySmallEb = 1e-30;
+        uint8_t levelSelected=0;
     };
 
 
