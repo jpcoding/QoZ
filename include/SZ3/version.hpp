@@ -13,4 +13,4 @@
 #define PROJECT_VER_PATCH "0"
 #define PROJECT_VER_TWEAK "0"
 
-#endif //SZ3_VERSION_HPP
+#endif //QoZ_VERSION_HPP
