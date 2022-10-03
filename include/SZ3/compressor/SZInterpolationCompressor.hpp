@@ -871,8 +871,8 @@ namespace SZ {
                             if (n < 4) {
                                 predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
                             } else {
-                                // predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
-                                predict_error+=quantize_tuning(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)),tuning);
+                                predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
+                                // predict_error+=quantize_tuning(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)),tuning);
                             }
                         }
 
@@ -896,8 +896,8 @@ namespace SZ {
 
                             } else {
                                
-                                // quantize(d - data, *d, *(d - stride));
-                                quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                                quantize(d - data, *d, *(d - stride));
+                                // quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
                                 
 
                             }
@@ -916,8 +916,8 @@ namespace SZ {
                         if (n < 4) {
                             recover(d - data, *d, *(d - stride));
                         } else {
-                            // recover(d - data, *d, *(d - stride));
-                            recover(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                            recover(d - data, *d, *(d - stride));
+                            // recover(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
                         }
                     }
                 }
@@ -939,8 +939,8 @@ namespace SZ {
                         predict_error+=quantize_tuning(d - data, *d, interp_quad_2(*(d - stride3x), *(d - stride), *(d + stride)),tuning);
                         if (n % 2 == 0) {
                             d = data + begin + (n - 1) * stride;
-                            // predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
-                            predict_error+=quantize_tuning(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)),tuning);
+                            predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
+                            // predict_error+=quantize_tuning(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)),tuning);
                         }
                     }
 
@@ -966,8 +966,8 @@ namespace SZ {
                         
                         if (n % 2 == 0) {
                             d = data + begin + (n - 1) * stride;
-                            // quantize(d - data, *d,  *(d - stride));
-                            quantize(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                            quantize(d - data, *d,  *(d - stride));
+                            // quantize(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
                         }
                         
                     }
@@ -989,8 +989,8 @@ namespace SZ {
 
                     if (n % 2 == 0) {
                         d = data + begin + (n - 1) * stride;
-                        // recover(d - data, *d, *(d - stride));
-                        recover(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                        recover(d - data, *d, *(d - stride));
+                        // recover(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
                     }
                 }
             }
