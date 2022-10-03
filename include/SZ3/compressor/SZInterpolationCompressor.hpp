@@ -117,37 +117,52 @@ namespace SZ {
             }
             size_t op_index=0;
 
-
+            double reduction_factor;
+            double real_eb_ratio;
+            if( interpolators[interpolator_id] == "linear")
+            {
+                reduction_factor = sqrt(27/8);
+            }
+            else 
+            {
+                reduction_factor = sqrt(4.462681);
+            }
+            real_eb_ratio = pow(1/reduction_factor, interpolation_level-1);
     
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
-                if (alpha<0) {
-                    if (level >= 3) {
-                        quantizer.set_eb(eb * eb_ratio);
-                    } else {
-                        quantizer.set_eb(eb);
-                    }
-                }
+                quantizer.set_eb(eb * real_eb_ratio);
+                // std::cout<< "eb = " << eb <<std::endl;
+                // std::cout<< "real_eb_ratio = " << real_eb_ratio <<std::endl;
+                // std::cout<< "level" << level << std::endl; 
+                real_eb_ratio *= reduction_factor;
+                // if (alpha<0) {
+                //     if (level >= 3) {
+                //         quantizer.set_eb(eb * eb_ratio);
+                //     } else {
+                //         quantizer.set_eb(eb);
+                //     }
+                // }
                 
-                else if (alpha>=1){
+                // else if (alpha>=1){
                     
                     
-                    double cur_ratio=pow(alpha,level-1);
-                    if (cur_ratio>beta){
-                        cur_ratio=beta;
-                    }
+                //     double cur_ratio=pow(alpha,level-1);
+                //     if (cur_ratio>beta){
+                //         cur_ratio=beta;
+                //     }
                     
-                    quantizer.set_eb(eb/cur_ratio);
-                }
-                else{
+                //     quantizer.set_eb(eb/cur_ratio);
+                // }
+                // else{
                     
                     
-                    double cur_ratio=1-(level-1)*alpha;
-                    if (cur_ratio<beta){
-                        cur_ratio=beta;
-                    }
+                //     double cur_ratio=1-(level-1)*alpha;
+                //     if (cur_ratio<beta){
+                //         cur_ratio=beta;
+                //     }
                    
-                    quantizer.set_eb(eb*cur_ratio);
-                }
+                //     quantizer.set_eb(eb*cur_ratio);
+                // }
 
                
                
@@ -303,40 +318,54 @@ namespace SZ {
             
             int levelwise_predictor_levels=conf.interpAlgo_list.size();
 
-            
+            double reduction_factor;
+            double real_eb_ratio;
+            if( interpolators[interpolator_id] == "linear")
+            {
+                reduction_factor = sqrt(27/8);
+            }
+            else 
+            {
+                reduction_factor = sqrt(4.462681);
+            }
+            real_eb_ratio = pow(1/reduction_factor, start_level-1);
 
 
             for (uint level = start_level; level > end_level && level <= start_level; level--) {
 
+                quantizer.set_eb(eb * real_eb_ratio);
+                // std::cout<< "eb = " << eb <<std::endl;
+                // std::cout<< "real_eb_ratio = " << real_eb_ratio <<std::endl;
+                // std::cout<< "level" << level << std::endl; 
+                real_eb_ratio *= reduction_factor;
                 
-
-                if (alpha<0) {
-                    if (level >= 3) {
-                        quantizer.set_eb(eb * eb_ratio);
-                    } else {
-                        quantizer.set_eb(eb);
-                    }
-                }
-                else if (alpha>=1){
+                // if (alpha<0) {
+                //     if (level >= 3) {
+                //         quantizer.set_eb(eb * eb_ratio);
+                //     } else {
+                //         quantizer.set_eb(eb);
+                //     }
+                // }
+                // else if (alpha>=1){
                     
                     
-                    double cur_ratio=pow(alpha,level-1);
-                    if (cur_ratio>beta){
-                        cur_ratio=beta;
-                    }
+                //     double cur_ratio=pow(alpha,level-1);
+                //     if (cur_ratio>beta){
+                //         cur_ratio=beta;
+                //     }
                     
-                    quantizer.set_eb(eb/cur_ratio);
-                }
-                else{
+                //     quantizer.set_eb(eb/cur_ratio);
+                // }
+                // else{
                     
                     
-                    double cur_ratio=1-(level-1)*alpha;
-                    if (cur_ratio<beta){
-                        cur_ratio=beta;
-                    }
+                //     double cur_ratio=1-(level-1)*alpha;
+                //     if (cur_ratio<beta){
+                //         cur_ratio=beta;
+                //     }
                     
-                    quantizer.set_eb(eb*cur_ratio);
-                }
+                //     quantizer.set_eb(eb*cur_ratio);
+                // }
               
                
                     
@@ -842,8 +871,8 @@ namespace SZ {
                             if (n < 4) {
                                 predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
                             } else {
-                                predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
-                                // predict_error+=quantize_tuning(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)),tuning);
+                                // predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
+                                predict_error+=quantize_tuning(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)),tuning);
                             }
                         }
 
@@ -867,8 +896,8 @@ namespace SZ {
 
                             } else {
                                
-                                quantize(d - data, *d, *(d - stride));
-                                // quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                                // quantize(d - data, *d, *(d - stride));
+                                quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
                                 
 
                             }
@@ -887,8 +916,8 @@ namespace SZ {
                         if (n < 4) {
                             recover(d - data, *d, *(d - stride));
                         } else {
-                            recover(d - data, *d, *(d - stride));
-                            // recover(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                            // recover(d - data, *d, *(d - stride));
+                            recover(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
                         }
                     }
                 }
@@ -910,8 +939,8 @@ namespace SZ {
                         predict_error+=quantize_tuning(d - data, *d, interp_quad_2(*(d - stride3x), *(d - stride), *(d + stride)),tuning);
                         if (n % 2 == 0) {
                             d = data + begin + (n - 1) * stride;
-                            predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
-                            // predict_error+=quantize_tuning(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)),tuning);
+                            // predict_error+=quantize_tuning(d - data, *d, *(d - stride),tuning);
+                            predict_error+=quantize_tuning(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)),tuning);
                         }
                     }
 
@@ -937,8 +966,8 @@ namespace SZ {
                         
                         if (n % 2 == 0) {
                             d = data + begin + (n - 1) * stride;
-                            quantize(d - data, *d,  *(d - stride));
-                            // quantize(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                            // quantize(d - data, *d,  *(d - stride));
+                            quantize(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
                         }
                         
                     }
@@ -960,8 +989,8 @@ namespace SZ {
 
                     if (n % 2 == 0) {
                         d = data + begin + (n - 1) * stride;
-                        recover(d - data, *d, *(d - stride));
-                        // recover(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                        // recover(d - data, *d, *(d - stride));
+                        recover(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
                     }
                 }
             }
