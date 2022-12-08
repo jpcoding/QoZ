@@ -125,8 +125,8 @@ namespace SZ {
             }
             else 
             {
-                reduction_factor = sqrt(4.462681);
-            }
+                reduction_factor = sqrt(4.4159889);   
+            }         
             real_eb_ratio = pow(1/reduction_factor, interpolation_level-1);
     
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
@@ -326,7 +326,7 @@ namespace SZ {
             }
             else 
             {
-                reduction_factor = sqrt(4.462681);
+                reduction_factor = sqrt(4.4159889);
             }
             real_eb_ratio = pow(1/reduction_factor, start_level-1);
 
