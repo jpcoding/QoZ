@@ -26,6 +26,7 @@
 #include <limits>
 #include <cstring>
 #include <cstdlib>
+#include<vector>
 
 
 
@@ -989,14 +990,14 @@ double Tuning(QoZ::Config &conf, T *data){
 
     for (size_t i = 0; i < N; i++) {
         if ( max_interp_level < ceil(log2(conf.dims[i]))) {
-             max_interp_level = (uint) ceil(log2(conf.dims[i]));
+             max_interp_level = (QoZ::uint) ceil(log2(conf.dims[i]));
         }
                 
     }
 
     if (conf.maxStep>0){
         anchor_rate=1/(pow(conf.maxStep,N));   
-        int temp_max_interp_level=(uint)log2(conf.maxStep);//to be catious: the max_interp_level is different from the ones in szinterpcompressor, which includes the level of anchor grid.
+        int temp_max_interp_level=(QoZ::uint)log2(conf.maxStep);//to be catious: the max_interp_level is different from the ones in szinterpcompressor, which includes the level of anchor grid.
         if (temp_max_interp_level<=max_interp_level){                  
             max_interp_level=temp_max_interp_level;
         }
@@ -1204,7 +1205,7 @@ double Tuning(QoZ::Config &conf, T *data){
                     uint8_t bestInterpAlgo = QoZ::INTERP_ALGO_CUBIC;
                     uint8_t bestDirection = 0;
                     double best_interp_absloss=std::numeric_limits<double>::max();
-                    conf.cmprAlgo == QoZ::ALGO_INTERP;                  
+                    // conf.cmprAlgo == QoZ::ALGO_INTERP;                  
                     for (auto &interp_op: interpAlgo_Candidates) {
                         for (auto &interp_direction: interpDirection_Candidates) {
                             //std::cout<<"pd4"<<std::endl;

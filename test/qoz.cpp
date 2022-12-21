@@ -144,7 +144,7 @@ void compress(char *inPath, char *cmpPath, QoZ::Config conf) {
 
     char outputFilePath[1024];
     if (cmpPath == nullptr) {
-        sprintf(outputFilePath, "%s.qoz", inPath);
+        snprintf(outputFilePath, 1024,"%s.qoz", inPath);
     } else {
         strcpy(outputFilePath, cmpPath);
     }
@@ -177,7 +177,7 @@ void decompress(char *inPath, char *cmpPath, char *decPath,
 
     char outputFilePath[1024];
     if (decPath == nullptr) {
-        sprintf(outputFilePath, "%s.out", cmpPath);
+        snprintf(outputFilePath, 1024, "%s.out", cmpPath);
     } else {
         strcpy(outputFilePath, decPath);
     }
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
     if (inPath != nullptr && cmpPath == nullptr && decPath != nullptr) {
         compression = true;
         decompression = true;
-        sprintf(cmpPathTmp, "%s.qoz.tmp", inPath);
+        snprintf(cmpPathTmp, 1024,"%s.qoz.tmp", inPath);
         cmpPath = cmpPathTmp;
         delCmpPath = true;
     }
@@ -519,11 +519,11 @@ int main(int argc, char *argv[]) {
         if (dataType == SZ_FLOAT) {
             compress<float>(inPath, cmpPath, conf);
         } else if (dataType == SZ_DOUBLE) {
-            compress<double>(inPath, cmpPath, conf);
+            // compress<double>(inPath, cmpPath, conf);
         } else if (dataType == SZ_INT32) {
-            compress<int32_t>(inPath, cmpPath, conf);
+            // compress<int32_t>(inPath, cmpPath, conf);
         } else if (dataType == SZ_INT64) {
-            compress<int64_t>(inPath, cmpPath, conf);
+            // compress<int64_t>(inPath, cmpPath, conf);
         } else {
             printf("Error: data type not supported \n");
             usage();
@@ -539,11 +539,11 @@ int main(int argc, char *argv[]) {
         if (dataType == SZ_FLOAT) {
             decompress<float>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_DOUBLE) {
-            decompress<double>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<double>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_INT32) {
-            decompress<int32_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<int32_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_INT64) {
-            decompress<int64_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<int64_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else {
             printf("Error: data type not supported \n");
             usage();
