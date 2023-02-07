@@ -34,6 +34,12 @@ namespace SZ {
     };
     const char *TUNING_TARGET_STR[] = {"TUNING_TARGET_RD", "TUNING_TARGET_CR", "TUNING_TARGET_SSIM", "TUNING_TARGET_AC"};
 
+    enum BLOCK_SIFT_MODE{
+        VARIANCE, RANGE, BLOCK_MAX,ISOVALUE
+    };
+    constexpr const char *BLOCK_SIFT_MODE_STR[] = {"VARIANCE", "RANGE", "BLOCK_MAX", "ISOVALUE"};
+    constexpr BLOCK_SIFT_MODE BLOCK_SIFT_MODE_OPTIONS[] = {VARIANCE, RANGE, BLOCK_MAX, ISOVALUE};
+    
     template<class T>
     const char *enum2Str(T e) {
         if (std::is_same<T, ALGO>::value) {
@@ -161,9 +167,32 @@ namespace SZ {
             SSIMBlockSize=cfg.GetInteger("AlgoSettings", "SSIMBlockSize", SSIMBlockSize);
             fixBlockSize=cfg.GetInteger("AlgoSettings", "fixBlockSize", fixBlockSize);
             verbose=cfg.GetInteger("AlgoSettings", "verbose", verbose);
-            
 
-
+            // additional variable
+            detection_block_size = cfg.GetInteger("ArtifactSettings", "DetectionBlockSize", detection_block_size);
+            detection_threshold = cfg.GetReal("ArtifactSettings", "DetectionThreshold", detection_threshold);
+            detection_eb_rate = cfg.GetReal("ArtifactSettings", "DetectionEBRate", detection_eb_rate);
+            noise_rate = cfg.GetReal("ArtifactSettings", "NoiseRate", noise_rate);
+            auto block_sift_mode_str = cfg.Get("ArtifactSettings", "block_sift_mode", "");
+            if(block_sift_mode_str == BLOCK_SIFT_MODE_STR[VARIANCE]){
+                block_sift_mode = VARIANCE;
+            }
+            else if(block_sift_mode_str == BLOCK_SIFT_MODE_STR[RANGE])
+            {
+                block_sift_mode = RANGE;
+            }
+            else if(block_sift_mode_str == BLOCK_SIFT_MODE_STR[BLOCK_MAX])
+            {
+                block_sift_mode = BLOCK_MAX;
+            }
+            else if (block_sift_mode_str == BLOCK_SIFT_MODE_STR[ISOVALUE])
+            {
+                block_sift_mode = ISOVALUE;
+            }
+            block_flush_on = cfg.GetBoolean("ArtifactSettings", "block_flush_on", block_flush_on);
+            block_sift_on = cfg.GetBoolean("ArtifactSettings", "block_sift_on", block_sift_on);
+            block_iso_on = cfg.GetBoolean("ArtifactSettings", "block_iso_on", block_iso_on);
+            block_isovalue =  cfg.GetReal("ArtifactSettings", "block_isovalue", block_isovalue);
         }
 
         void save(unsigned char *&c) {
@@ -197,6 +226,16 @@ namespace SZ {
             write(pred_dim, c);
             write(openmp, c);
             write(fixBlockSize, c);
+            // add additional variable
+            write(detection_block_size, c);
+            write(detection_threshold, c);
+            write(detection_eb_rate, c);
+            write(noise_rate, c);
+            write(block_sift_mode, c);
+            write(block_sift_on, c);
+            write(block_flush_on, c);
+
+            
             
         };
 
@@ -231,6 +270,14 @@ namespace SZ {
             read(pred_dim, c);
             read(openmp, c);
             read(fixBlockSize, c);
+            // add additional variable
+            read(detection_block_size, c);
+            read(detection_threshold, c);
+            read(detection_eb_rate, c);
+            read(noise_rate, c);
+            read(block_sift_mode, c);
+            read(block_sift_on, c);
+            read(block_flush_on, c);
         }
 
         void print() {
@@ -289,7 +336,16 @@ namespace SZ {
         std::vector<double> lorenzo1_coeffs;
         std::vector<double> lorenzo2_coeffs;
         int verbose=1;
-        
+        // for artifact mitagation
+        int detection_block_size = 4;
+        double detection_threshold = 0.9;
+        double detection_eb_rate = 1.0 / sqrt(4.4159889);
+        double noise_rate = 0;
+        uint8_t block_sift_mode = RANGE;
+        bool block_flush_on = 1;
+        bool block_sift_on =1;
+        bool block_iso_on=0;
+        double block_isovalue=0;
 
     };
 
