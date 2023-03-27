@@ -152,6 +152,7 @@ namespace SZ {
             }
             size_t op_index=0;
 
+<<<<<<< HEAD
             // double reduction_factor;
             // double real_eb_ratio;
             // if( interpolators[interpolator_id] == "linear")
@@ -171,6 +172,20 @@ namespace SZ {
             std::cout<< "significant_block_id.size " << significant_block_id.size()<<std::endl;
 
 
+=======
+            double reduction_factor;
+            double real_eb_ratio;
+            if( interpolators[interpolator_id] == "linear")
+            {
+                reduction_factor = pow(linear_opt_factor,N);
+            }
+            else 
+            {
+                reduction_factor = pow(cubic_opt_factor,N);   
+            }         
+            real_eb_ratio = pow(1/reduction_factor, interpolation_level-1);
+    
+>>>>>>> d37df73 (correct inter lebel)
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
                 // quantizer.set_eb(eb * real_eb_ratio);
                 // std::cout<< "eb = " << eb <<std::endl;
@@ -393,8 +408,22 @@ namespace SZ {
             
             int levelwise_predictor_levels=conf.interpAlgo_list.size();
 
+<<<<<<< HEAD
             // double reduction_factor;
             // double real_eb_ratio;
+=======
+            double reduction_factor;
+            double real_eb_ratio;
+            if( interpolators[interpolator_id] == "linear")
+            {
+                reduction_factor = pow(linear_opt_factor,N);
+            }
+            else 
+            {
+                reduction_factor = pow(cubic_opt_factor,N);   
+            }      
+            real_eb_ratio = pow(1/reduction_factor, start_level-1);
+>>>>>>> d37df73 (correct inter lebel)
 
             // if( interpolators[interpolator_id] == "linear")
             // {
@@ -2638,6 +2667,7 @@ namespace SZ {
         std::array<size_t, N> dimension_offsets;
         std::vector<std::array<int, N>> dimension_sequences;
         int direction_sequence_id;
+<<<<<<< HEAD
 
         // added for artifact mitigation
         int current_level = 0;
@@ -2664,6 +2694,10 @@ namespace SZ {
         T original_min;
 
 
+=======
+        double linear_opt_factor = sqrt(1.5);
+        double cubic_opt_factor = 1.2808688457449497;
+>>>>>>> d37df73 (correct inter lebel)
     };
 
 

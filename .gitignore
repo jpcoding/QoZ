@@ -8,4 +8,8 @@ cmake-build-release
 .vscode
 testbuild
 configs
+<<<<<<< HEAD
 .*
+=======
+.DS_Store
+>>>>>>> d37df73 (correct inter lebel)
