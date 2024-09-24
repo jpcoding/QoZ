@@ -2,6 +2,7 @@
 #define SZ3_SZINTERP_HPP
 
 #include "QoZ/compressor/SZInterpolationCompressor.hpp"
+#include "QoZ/compressor/SZInterpolationCompressorPred.hpp"
 #include "QoZ/compressor/deprecated/SZBlockInterpolationCompressor.hpp"
 #include "QoZ/quantizer/IntegerQuantizer.hpp"
 #include "QoZ/lossless/Lossless_zstd.hpp"
@@ -33,30 +34,53 @@ char *SZ_compress_Interp(QoZ::Config &conf, T *data, size_t &outSize) {
     QoZ::calAbsErrorBound(conf, data);
 
     //conf.print();
-    
-    auto sz = QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
+    if(conf.quantization_prediction_on == false)
+    {
+        auto sz = QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
             QoZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2),
             QoZ::HuffmanEncoder<int>(),
             QoZ::Lossless_zstd());
-
+        //QoZ::Timer timer;
+        //timer.start();
+        char *cmpData = (char *) sz.compress(conf, data, outSize);
+        //double incall_time = timer.stop();
+        //std::cout << "incall time = " << incall_time << "s" << std::endl;
+        return cmpData;
+    }
+    else{
+        auto sz = QoZ::SZInterpolationCompressorPred<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
+        QoZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2),
+        QoZ::HuffmanEncoder<int>(),
+        QoZ::Lossless_zstd());
+        //QoZ::Timer timer;
+        //timer.start();
+        char *cmpData = (char *) sz.compress(conf, data, outSize);
+        //double incall_time = timer.stop();
+        //std::cout << "incall time = " << incall_time << "s" << std::endl;
+        return cmpData;
+    }
     
-   
-    //QoZ::Timer timer;
-    //timer.start();
-    char *cmpData = (char *) sz.compress(conf, data, outSize);
-     //double incall_time = timer.stop();
-    //std::cout << "incall time = " << incall_time << "s" << std::endl;
-    return cmpData;
 }
 template<class T, QoZ::uint N>
 void SZ_decompress_Interp(const QoZ::Config &conf, char *cmpData, size_t cmpSize, T *decData) {
     assert(conf.cmprAlgo == QoZ::ALGO_INTERP);
-    QoZ::uchar const *cmpDataPos = (QoZ::uchar *) cmpData;
-    auto sz = QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
-            QoZ::LinearQuantizer<T>(),
-            QoZ::HuffmanEncoder<int>(),
-            QoZ::Lossless_zstd());
-    sz.decompress(cmpDataPos, cmpSize, decData);
+    if(conf.quantization_prediction_on == false)
+    {    
+        QoZ::uchar const *cmpDataPos = (QoZ::uchar *) cmpData;
+        auto sz = QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
+                QoZ::LinearQuantizer<T>(),
+                QoZ::HuffmanEncoder<int>(),
+                QoZ::Lossless_zstd());
+        sz.decompress(cmpDataPos, cmpSize, decData);
+    }
+    else {
+        QoZ::uchar const *cmpDataPos = (QoZ::uchar *) cmpData;
+        auto sz = QoZ::SZInterpolationCompressorPred<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
+                QoZ::LinearQuantizer<T>(),
+                QoZ::HuffmanEncoder<int>(),
+                QoZ::Lossless_zstd());
+        sz.decompress(cmpDataPos, cmpSize, decData);
+    }
 }
 
 

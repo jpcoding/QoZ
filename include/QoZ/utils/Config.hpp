@@ -282,6 +282,8 @@ namespace QoZ {
         int fixBlockSize=0;
         int verbose=1;
         int QoZ=1;
+        bool quantization_prediction_on= 0;
+        int quantization_prediction_start_level = 1;
         
 
     };

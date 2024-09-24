@@ -226,6 +226,7 @@ int main(int argc, char *argv[]) {
     char *tuningTarget = nullptr;
     int maxStep=0;
     int sampleBlockSize=0;
+    bool quant_pred = 0;
 
     bool sz2mode = false;
     int testLorenzo=0;
@@ -373,11 +374,11 @@ int main(int argc, char *argv[]) {
                     usage();
                 relErrorBound = argv[i];
                 break;
-//            case 'P':
-//                if (++i == argc)
-//                    usage();
-//                pwrErrorBound = argv[i];
-//                break;
+        //    case 'P':
+        //        if (++i == argc)
+        //            usage();
+        //        pwrErrorBound = argv[i];
+        //        break;
             case 'N':
                 if (++i == argc)
                     usage();
@@ -387,6 +388,9 @@ int main(int argc, char *argv[]) {
                 if (++i == argc)
                     usage();
                 psnrErrorBound = argv[i];
+                break;
+            case 'Q':
+                quant_pred = true;
                 break;
             case 'T':
                 if (++i == argc)
@@ -448,6 +452,7 @@ int main(int argc, char *argv[]) {
     if (qoz>=0){
         conf.QoZ=qoz;
     }
+    conf.quantization_prediction_on = quant_pred; 
     if(testLorenzo)
         conf.testLorenzo=testLorenzo;
     if(maxStep>0)
@@ -530,11 +535,11 @@ int main(int argc, char *argv[]) {
         if (dataType == SZ_FLOAT) {
             compress<float>(inPath, cmpPath, conf);
         } else if (dataType == SZ_DOUBLE) {
-            compress<double>(inPath, cmpPath, conf);
+            // compress<double>(inPath, cmpPath, conf);
         } else if (dataType == SZ_INT32) {
-            compress<int32_t>(inPath, cmpPath, conf);
+            // compress<int32_t>(inPath, cmpPath, conf);
         } else if (dataType == SZ_INT64) {
-            compress<int64_t>(inPath, cmpPath, conf);
+            // compress<int64_t>(inPath, cmpPath, conf);
         } else {
             printf("Error: data type not supported \n");
             usage();
@@ -550,11 +555,11 @@ int main(int argc, char *argv[]) {
         if (dataType == SZ_FLOAT) {
             decompress<float>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_DOUBLE) {
-            decompress<double>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<double>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_INT32) {
-            decompress<int32_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<int32_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else if (dataType == SZ_INT64) {
-            decompress<int64_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
+            // decompress<int64_t>(inPath, cmpPath, decPath, conf, binaryOutput, printCmpResults);
         } else {
             printf("Error: data type not supported \n");
             usage();
