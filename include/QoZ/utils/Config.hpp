@@ -283,7 +283,7 @@ namespace QoZ {
         int verbose=1;
         int QoZ=1;
         bool quantization_prediction_on= 0;
-        int quantization_prediction_start_level = 1;
+        int quantization_prediction_start_level = 2;
         
 
     };

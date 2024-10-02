@@ -227,6 +227,7 @@ int main(int argc, char *argv[]) {
     int maxStep=0;
     int sampleBlockSize=0;
     bool quant_pred = 0;
+    int quant_pred_start_level=0;
 
     bool sz2mode = false;
     int testLorenzo=0;
@@ -392,6 +393,10 @@ int main(int argc, char *argv[]) {
             case 'Q':
                 quant_pred = true;
                 break;
+            case 'L':
+                if (++i == argc || sscanf(argv[i], "%d", &quant_pred_start_level) != 1)
+                    usage();
+                break;
             case 'T':
                 if (++i == argc)
                     usage();
@@ -453,6 +458,7 @@ int main(int argc, char *argv[]) {
         conf.QoZ=qoz;
     }
     conf.quantization_prediction_on = quant_pred; 
+    conf.quantization_prediction_start_level = quant_pred_start_level;
     if(testLorenzo)
         conf.testLorenzo=testLorenzo;
     if(maxStep>0)

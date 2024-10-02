@@ -601,8 +601,9 @@ namespace QoZ {
             do {
                 dimension_sequences.push_back(sequence);
             } while (std::next_permutation(sequence.begin(), sequence.end()));
-        aux_quant_inds_ptr = std::make_shared<std::vector<int>>();
-        if(quant_pred_on == true) aux_quant_inds_ptr->resize(num_elements, 0);
+        // aux_quant_inds_ptr = std::make_shared<std::vector<int>>();
+        // if(quant_pred_on == true) aux_quant_inds_ptr->resize(num_elements, 0);
+        if(quant_pred_on == true) aux_quant_inds.resize(num_elements, 0);
 
         }
        
@@ -706,53 +707,41 @@ namespace QoZ {
 
         }
 
-          inline int backward_compensate_pred(
-      size_t idx, size_t offset1, size_t offset2, T &pred,
-      const double compensation)
-  {
-    // return 0;
-    // compensation = ? * eb; 0.5, 1.1, 1.5, 2
-    //    0   1  2
-    // 0 *A  *B *C
-    // 1 *D  *E *F
-    // 2 *G  *H  X
-    // one layer is enough
-    int A = idx - offset1 * 2 - offset2 * 2;
-    int B = idx - offset1 * 2 - offset2;
-    int C = idx - offset1 * 2;
-    int D = idx - offset1 - offset2 * 2;
-    int E = idx - offset1 - offset2;
-    int F = idx - offset1;
-    int G = idx - offset2 * 2;
-    int H = idx - offset2;
-    if ((*aux_quant_inds_ptr)[E] == 0 || (*aux_quant_inds_ptr)[F] == 0 ||
-        (*aux_quant_inds_ptr)[H] == 0) {
-      return 0;
-    }
-    // int quant_A = (*aux_quant_inds_ptr)[A] - quantizer.get_radius();
-    // int quant_B = (*aux_quant_inds_ptr)[B] - quantizer.get_radius();
-    // int quant_C = (*aux_quant_inds_ptr)[C] - quantizer.get_radius();
-    // int quant_D = (*aux_quant_inds_ptr)[D] - quantizer.get_radius(); // be cautious about out-of-bound access
-    int quant_E = (*aux_quant_inds_ptr)[E] - quantizer.get_radius();
-    int quant_F = (*aux_quant_inds_ptr)[F] - quantizer.get_radius();
-    // int quant_G = (*aux_quant_inds_ptr)[G] - quantizer.get_radius();
-    int quant_H = (*aux_quant_inds_ptr)[H] - quantizer.get_radius();
+        inline int backward_compensate_pred(
+            size_t idx, size_t offset1, size_t offset2)
+        {
+            // pred_timer.start();
+            
+            int radius = quantizer.get_radius();
+            int E = idx - offset1 - offset2;
+            int F = idx - offset1;
+            int H = idx - offset2;
+            // int quant_E = (*aux_quant_inds_ptr)[E];
+            // int quant_F = (*aux_quant_inds_ptr)[F];
+            // int quant_H = (*aux_quant_inds_ptr)[H];
 
-    int quant_compensate = 0;
-    if (quant_H > 0 && quant_F > 0) {
-      quant_compensate = (quant_H + quant_F - quant_E);
-      pred += quant_compensate * compensation;
-    }
-    else if (quant_H < 0 && quant_F < 0) {
-      quant_compensate = (quant_H + quant_F - quant_E);
-      pred+= quant_compensate * compensation;
+            int quant_E = aux_quant_inds[E];
+            int quant_F = aux_quant_inds[F];
+            int quant_H = aux_quant_inds[H];
+            if (quant_E == 0 || quant_F == 0 ||
+                quant_H == 0) {
+            // quant_pred_time+=pred_timer.stop();
+            return 0;
+            }
 
-    }
-    else {
-      return 0;
-    }
-    return quant_compensate;
-  }
+            int quant_compensate = 0;
+            bool condition = (quant_E - radius) *(quant_H - radius) >0; 
+            // if ((quant_E > radius  && quant_H > radius)||
+            //     (quant_E < radius  && quant_H < radius)) 
+            if(condition) {
+            // quant_pred_time+=pred_timer.stop();
+            return quant_F + quant_H - quant_E -  radius;
+            }
+            else {
+            // quant_pred_time+=pred_timer.stop();
+            return 0;
+            }
+        }
 
 
         inline void quantize1(size_t idx, T &d, T pred) {
@@ -774,34 +763,28 @@ namespace QoZ {
             //return fabs(d-orig);
         }
 
-          inline void quant_pred_quantize(size_t idx, T &d, T &pred, size_t offset1, size_t offset2,  bool quant_record)
-  {
-    int quant_compensation = 0;
-    if(quant_record == false) 
-    {
-    double compensation =
-                region_error_control_eb_compensation * quantizer.get_eb();
-    quant_compensation = backward_compensate_pred(
-        idx, offset1, offset2, pred, compensation);
-    }
-    
-    quantize(idx, d, pred);
-
-    if(quant_inds.back()==0)
-    {
-      (*aux_quant_inds_ptr)[idx] = 0;
-    }
-    else {
-      (*aux_quant_inds_ptr)[idx] = quant_inds.back() + quant_compensation;
-    }
-    #ifdef SZ_ANALYSIS
-    // my_level[idx] = current_level;
-    // my_quant_inds_copy[idx] = quant_inds.back();
-    // my_pred[idx] = pred;
-    // my_interp_direction[idx] = my_current_interp_direction;
-    #endif
-    
-  }
+        inline int quant_pred_quantize(size_t idx, T &d, T &pred, size_t offset1, size_t offset2,  bool quant_record_only)
+        {
+            // return 0;
+        // CALLGRIND_START_INSTRUMENTATION;
+        // CALLGRIND_TOGGLE_COLLECT;
+            
+            // int quant_compensation = 0;
+            // global_timer.start();
+            quantize(idx, d, pred);
+            int quant_compensation = 0;
+            // quantize_time += global_timer.stop();
+            // (*aux_quant_inds_ptr)[idx] = quant_inds.back();
+            aux_quant_inds[idx] = quant_inds.back();
+            if(quant_record_only == false) 
+            {
+            quant_compensation = backward_compensate_pred(idx, offset1, offset2);
+            quant_inds.back() = quant_inds.back() - quant_compensation;
+            }
+        // CALLGRIND_TOGGLE_COLLECT;
+        // CALLGRIND_STOP_INSTRUMENTATION;
+            return 0;
+        }
 
         inline double quantize_tuning(size_t idx, T &d, T pred, int mode=1) {
 
@@ -827,25 +810,18 @@ namespace QoZ {
             d = quantizer.recover(pred, quant_inds[quant_index++]);
         };
 
-    inline void quant_pred_recover(size_t idx, T &d, T pred,size_t offset1, size_t offset2,  bool quant_record)
-  {
-    int quant_compensation = 0;
-    if(quant_record == false)
-    {double  compensation =
-                region_error_control_eb_compensation * quantizer.get_eb();
-    quant_compensation = backward_compensate_pred(
-        idx, offset1, offset2, pred, compensation); 
-    }
-
-    recover(idx, d, pred);
-
-    if(quant_inds[quant_index-1]==0)
+  inline int quant_pred_recover(size_t idx, T &d, T pred,size_t offset1, size_t offset2,  bool quant_record_only)
+  { 
+    int quant_compensation = 0; 
+    if(quant_record_only == false) 
     {
-      (*aux_quant_inds_ptr)[idx] = 0;
+      quant_compensation = backward_compensate_pred(idx, offset1, offset2);
+      quant_inds[quant_index] = quant_inds[quant_index] + quant_compensation;
     }
-    else {
-      (*aux_quant_inds_ptr)[idx] = quant_inds[quant_index-1] + quant_compensation;
-    }
+    recover(idx, d, pred);
+    // (*aux_quant_inds_ptr)[idx] = quant_inds[quant_index-1]; 
+    aux_quant_inds[idx] = quant_inds[quant_index-1];
+    return 0;
   }
 
 
@@ -2068,7 +2044,8 @@ namespace QoZ {
         bool quant_pred_on = false;
         int quant_pred_start_level = 0;
         double region_error_control_eb_compensation = 2.0; 
-        std::shared_ptr<std::vector<int>> aux_quant_inds_ptr;
+        // std::shared_ptr<std::vector<int>> aux_quant_inds_ptr;
+        std::vector<int> aux_quant_inds;
         bool use_cross_block_cubic = false;
         bool use_natural_cubic = false;
 
