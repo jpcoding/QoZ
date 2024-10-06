@@ -497,6 +497,11 @@ namespace QoZ {
 
             compressed_size += interp_compressed_size;
             
+            #ifdef SZ_ANALYSIS
+            writefile("orig_quant.dat",aux_quant_inds.data(),num_elements);
+            writefile("processed_quant.dat",my_quant_inds.data(),num_elements);
+            #endif
+            
             //quantizer.print_unpred();
             return lossless_data;
         }
@@ -606,6 +611,9 @@ namespace QoZ {
         // aux_quant_inds_ptr = std::make_shared<std::vector<int>>();
         // if(quant_pred_on == true) aux_quant_inds_ptr->resize(num_elements, 0);
         if(quant_pred_on == true) aux_quant_inds.resize(num_elements, 0);
+        #ifdef SZ_ANALYSIS
+        my_quant_inds.resize(num_elements, 0);
+        #endif
 
         }
        
@@ -763,19 +771,13 @@ namespace QoZ {
             //T orig=d;
             quant_inds.push_back(quantizer.quantize_and_overwrite(d, pred));
             //return fabs(d-orig);
+            
         }
 
         inline int quant_pred_quantize(size_t idx, T &d, T &pred, size_t offset1, size_t offset2,  bool quant_record_only)
         {
-            // return 0;
-        // CALLGRIND_START_INSTRUMENTATION;
-        // CALLGRIND_TOGGLE_COLLECT;
-            
-            // int quant_compensation = 0;
-            // global_timer.start();
             quantize(idx, d, pred);
             int quant_compensation = 0;
-            // quantize_time += global_timer.stop();
             // (*aux_quant_inds_ptr)[idx] = quant_inds.back();
             aux_quant_inds[idx] = quant_inds.back();
             if(quant_record_only == false) 
@@ -783,8 +785,10 @@ namespace QoZ {
             quant_compensation = backward_compensate_pred(idx, offset1, offset2);
             quant_inds.back() = quant_inds.back() - quant_compensation;
             }
-        // CALLGRIND_TOGGLE_COLLECT;
-        // CALLGRIND_STOP_INSTRUMENTATION;
+            #ifdef SZ_ANALYSIS
+            my_quant_inds[idx] = quant_inds.back();
+            #endif
+
             return 0;
         }
 
@@ -1515,12 +1519,6 @@ namespace QoZ {
     double predict_error = 0;
     size_t stride2x = stride * 2;
 
-#ifdef SZ_ANALYSIS
-    my_current_interp_direction = 1;
-#endif
-
-
-
     const std::array<int, N> dims = dimension_sequences[direction];
 
     // bool use_begin_cross = (begin[dims[0]] != 0) && (use_cross_block_cubic); 
@@ -1557,9 +1555,7 @@ namespace QoZ {
 
 
 
-#ifdef SZ_ANALYSIS
-    my_current_interp_direction = 2;
-#endif
+
     // use_begin_cross = (begin[dims[1]] !=0) && (use_cross_block_cubic); 
     // is_cubic_end_boundary = (end[dims[1]]+1 == global_dimensions[dims[1]]);
     //                                 // ||(!use_cross_block_cubic);
@@ -1588,9 +1584,6 @@ namespace QoZ {
     }
   
 
-#ifdef SZ_ANALYSIS
-    my_current_interp_direction = 3;
-#endif
     // use_begin_cross = (begin[dims[2]] !=0) && (use_cross_block_cubic);
     // is_cubic_end_boundary = (end[dims[2]]+1 == global_dimensions[dims[2]]);
     // is_next_to_bound = (end[dims[2]] + stride2x+1 > global_dimensions[dims[2]]);
@@ -1728,6 +1721,7 @@ namespace QoZ {
         std::vector<int> aux_quant_inds;
         bool use_cross_block_cubic = false;
         bool use_natural_cubic = false;
+        std::vector<int> my_quant_inds; 
 
 
     };
